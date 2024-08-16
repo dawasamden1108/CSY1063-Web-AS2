@@ -5,6 +5,13 @@ let rightPressed = false;
 
 const main = document.querySelector('main');
 
+//To remove start button
+const startButton = document.querySelector(".start");
+
+startButton.addEventListener("click", () => {
+    startButton.remove();
+});
+
 //Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
