@@ -5,14 +5,14 @@ let rightPressed = false;
 
 const main = document.querySelector('main');
 
-//To remove start button
+// To remove start button
 const startButton = document.querySelector(".start");
 
 startButton.addEventListener("click", () => {
     startButton.remove();
 });
 
-//Player = 2, Wall = 1, Enemy = 3, Point = 0
+// Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
@@ -26,7 +26,7 @@ let maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
-//Populates the maze in the HTML
+// Populates the maze in the HTML
 for (let y of maze) {
     for (let x of y) {
         let block = document.createElement('div');
@@ -55,32 +55,35 @@ for (let y of maze) {
     }
 }
 
-//Player movement
-function keyUp(event) {
-    if (event.key === 'ArrowUp') {
-        upPressed = false;
-    } else if (event.key === 'ArrowDown') {
-        downPressed = false;
-    } else if (event.key === 'ArrowLeft') {
-        leftPressed = false;
-    } else if (event.key === 'ArrowRight') {
-        rightPressed = false;
-    }
-}
+const player = document.querySelector('#player');
+const playerMouth = player.querySelector('.mouth');
+let playerTop = 0;
+let playerLeft = 0;
 
-function keyDown(event) {
-    if (event.key === 'ArrowUp') {
-        upPressed = true;
-    } else if (event.key === 'ArrowDown') {
-        downPressed = true;
-    } else if (event.key === 'ArrowLeft') {
-        leftPressed = true;
-    } else if (event.key === 'ArrowRight') {
-        rightPressed = true;
+setInterval(function() {
+    if (downPressed && !checkWallCollisionForPlayer('down')) {
+        playerTop++;
+        player.style.top = playerTop + 'px';
+        playerMouth.classList = 'down'; 
+        checkPointCollection();
+    } else if (upPressed && !checkWallCollisionForPlayer('up')) {
+        playerTop--;
+        player.style.top = playerTop + 'px';
+        playerMouth.classList = 'up';
+        checkPointCollection();
+    } else if (leftPressed && !checkWallCollisionForPlayer('left')) {
+        playerLeft--;
+        player.style.left = playerLeft + 'px';
+        playerMouth.classList = 'left';
+        checkPointCollection();
+    } else if (rightPressed && !checkWallCollisionForPlayer('right')) {
+        playerLeft++;
+        player.style.left = playerLeft + 'px';
+        playerMouth.classList = 'right';
+        checkPointCollection();
     }
-}
+}, 10);
 
-//Detection with walls
 function checkWallCollisionForPlayer(direction) {
     const playerRect = player.getBoundingClientRect();
     const walls = document.querySelectorAll(".wall");
@@ -102,34 +105,65 @@ function checkWallCollisionForPlayer(direction) {
     return false;
 }
 
-const player = document.querySelector('#player');
-const playerMouth = player.querySelector('.mouth');
-let playerTop = 0;
-let playerLeft = 0;
+// To collect pellets
+let score = 0;
+function checkPointCollection() {
+    const points = document.querySelectorAll('.point');
+    const playerRect = player.getBoundingClientRect();
 
+    points.forEach(point => {
+        const pointRect = point.getBoundingClientRect();
 
-setInterval(function() {
-    if (downPressed && !checkWallCollisionForPlayer('down')) {
-        playerTop++;
-        player.style.top = playerTop + 'px';
-        playerMouth.classList = 'down';
-    } else if (upPressed && !checkWallCollisionForPlayer('up')) {
-        playerTop--;
-        player.style.top = playerTop + 'px';
-        playerMouth.classList = 'up';
-    } else if (leftPressed && !checkWallCollisionForPlayer('left')) {
-        playerLeft--;
-        player.style.left = playerLeft + 'px';
-        playerMouth.classList = 'left';
-    } else if (rightPressed && !checkWallCollisionForPlayer('right')) {
-        playerLeft++;
-        player.style.left = playerLeft + 'px';
-        playerMouth.classList = 'right';
-    }
-}, 10);
+        if (
+            playerRect.top < pointRect.bottom &&
+            playerRect.bottom > pointRect.top &&
+            playerRect.left < pointRect.right &&
+            playerRect.right > pointRect.left
+        ) {
+            // console.log("point");
+            point.classList.remove("point"); 
+            score+=10;
+            document.querySelector(".score p").textContent = score;
+        }
+    });
+}
 
-// document.addEventListener('keydown', keyDown);
-// document.addEventListener('keyup', keyUp);
+// setInterval(checkPointCollection, 100);
 
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
+
+function keyDown(event) {
+    switch (event.key) {
+        case 'ArrowUp':
+            upPressed = true;
+            break;
+        case 'ArrowDown':
+            downPressed = true;
+            break;
+        case 'ArrowLeft':
+            leftPressed = true;
+            break;
+        case 'ArrowRight':
+            rightPressed = true;
+            break;
+    }
+}
+
+function keyUp(event) {
+    switch (event.key) {
+        case 'ArrowUp':
+            upPressed = false;
+            break;
+        case 'ArrowDown':
+            downPressed = false;
+            break;
+        case 'ArrowLeft':
+            leftPressed = false;
+            break;
+        case 'ArrowRight':
+            rightPressed = false;
+            break;
+    }
+} 
+
