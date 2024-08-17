@@ -80,33 +80,56 @@ function keyDown(event) {
     }
 }
 
+//Detection with walls
+function checkWallCollisionForPlayer(direction) {
+    const playerRect = player.getBoundingClientRect();
+    const walls = document.querySelectorAll(".wall");
+
+    for (let wall of walls) {
+        const wallRect = wall.getBoundingClientRect();
+
+        if (direction === 'up' && playerRect.top - 1 < wallRect.bottom && playerRect.bottom > wallRect.top && playerRect.left < wallRect.right && playerRect.right > wallRect.left) {
+            return true;
+        } else if (direction === 'down' && playerRect.bottom + 1 > wallRect.top && playerRect.top < wallRect.bottom && playerRect.left < wallRect.right && playerRect.right > wallRect.left) {
+            return true;
+        } else if (direction === 'left' && playerRect.left - 1 < wallRect.right && playerRect.right > wallRect.left && playerRect.top < wallRect.bottom && playerRect.bottom > wallRect.top) {
+            return true;
+        } else if (direction === 'right' && playerRect.right + 1 > wallRect.left && playerRect.left < wallRect.right && playerRect.top < wallRect.bottom && playerRect.bottom > wallRect.top) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 const player = document.querySelector('#player');
 const playerMouth = player.querySelector('.mouth');
 let playerTop = 0;
 let playerLeft = 0;
 
+
 setInterval(function() {
-    if(downPressed) {
+    if (downPressed && !checkWallCollisionForPlayer('down')) {
         playerTop++;
         player.style.top = playerTop + 'px';
         playerMouth.classList = 'down';
-    }
-    else if(upPressed) {
+    } else if (upPressed && !checkWallCollisionForPlayer('up')) {
         playerTop--;
         player.style.top = playerTop + 'px';
         playerMouth.classList = 'up';
-    }
-    else if(leftPressed) {
+    } else if (leftPressed && !checkWallCollisionForPlayer('left')) {
         playerLeft--;
         player.style.left = playerLeft + 'px';
         playerMouth.classList = 'left';
-    }
-    else if(rightPressed) {
+    } else if (rightPressed && !checkWallCollisionForPlayer('right')) {
         playerLeft++;
         player.style.left = playerLeft + 'px';
         playerMouth.classList = 'right';
     }
 }, 10);
+
+// document.addEventListener('keydown', keyDown);
+// document.addEventListener('keyup', keyUp);
 
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
