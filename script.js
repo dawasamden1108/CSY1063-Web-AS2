@@ -60,6 +60,14 @@ const playerMouth = player.querySelector('.mouth');
 let playerTop = 0;
 let playerLeft = 0;
 
+function checkGameOver() {
+    if (checkEnemyCollision()) {
+        alert("Game Over!");
+        // Optionally, reload the page or reset the game state
+        location.reload();
+    }
+}
+
 setInterval(function() {
     if (downPressed && !checkWallCollisionForPlayer('down')) {
         playerTop++;
@@ -82,6 +90,7 @@ setInterval(function() {
         playerMouth.classList = 'right';
         checkPointCollection();
     }
+    checkGameOver();
 }, 10);
 
 function checkWallCollisionForPlayer(direction) {
@@ -105,6 +114,15 @@ function checkWallCollisionForPlayer(direction) {
     return false;
 }
 
+function checkWinCondition() {
+    const points = document.querySelectorAll('.point');
+    if (points.length === 0) {
+        alert("You Win!");
+        // Optionally, reload the page or reset the game state
+        location.reload();
+    }
+}
+
 // To collect pellets
 let score = 0;
 function checkPointCollection() {
@@ -124,6 +142,7 @@ function checkPointCollection() {
             point.classList.remove("point"); 
             score+=10;
             document.querySelector(".score p").textContent = score;
+            checkWinCondition();
         }
     });
 }
@@ -166,4 +185,81 @@ function keyUp(event) {
             break;
     }
 } 
+
+//-------------------------------------------------
+
+function moveEnemies() {
+    const enemies = document.querySelectorAll('.enemy');
+    enemies.forEach(enemy => {
+        const direction = Math.floor(Math.random() * 4);
+        const enemyRect = enemy.getBoundingClientRect();
+        let newTop = parseInt(enemy.style.top) || 0;
+        let newLeft = parseInt(enemy.style.left) || 0;
+
+        switch (direction) {
+            case 0: // up
+                if (!checkWallCollisionForEnemy(enemy, 'up')) newTop -= 60;
+                break;
+            case 1: // down
+                if (!checkWallCollisionForEnemy(enemy, 'down')) newTop += 60;
+                break;
+            case 2: // left
+                if (!checkWallCollisionForEnemy(enemy, 'left')) newLeft -= 60;
+                break;
+            case 3: // right
+                if (!checkWallCollisionForEnemy(enemy, 'right')) newLeft += 60;
+                break;
+        }
+        
+        console.log(`Enemy new position: top: ${newTop}, left: ${newLeft}`);
+
+        enemy.style.top = newTop + 'px';
+        enemy.style.left = newLeft + 'px';
+    });
+}
+setInterval(moveEnemies, 1000);
+
+function checkEnemyCollision() {
+    const playerRect = player.getBoundingClientRect();
+    const enemies = document.querySelectorAll('.enemy');
+
+    for (let enemy of enemies) {
+        const enemyRect = enemy.getBoundingClientRect();
+
+        if (
+            playerRect.top < enemyRect.bottom &&
+            playerRect.bottom > enemyRect.top &&
+            playerRect.left < enemyRect.right &&
+            playerRect.right > enemyRect.left
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function checkWallCollisionForEnemy(enemy, direction) {
+    const enemyRect = enemy.getBoundingClientRect();
+    const walls = document.querySelectorAll(".wall");
+
+    for (let wall of walls) {
+        const wallRect = wall.getBoundingClientRect();
+
+        if (direction === 'up' && enemyRect.top - 20 < wallRect.bottom && enemyRect.bottom > wallRect.top && enemyRect.left < wallRect.right && enemyRect.right > wallRect.left) {
+            return true;
+        } else if (direction === 'down' && enemyRect.bottom + 20 > wallRect.top && enemyRect.top < wallRect.bottom && enemyRect.left < wallRect.right && enemyRect.right > wallRect.left) {
+            return true;
+        } else if (direction === 'left' && enemyRect.left - 20 < wallRect.right && enemyRect.right > wallRect.left && enemyRect.top < wallRect.bottom && enemyRect.bottom > wallRect.top) {
+            return true;
+        } else if (direction === 'right' && enemyRect.right + 20 > wallRect.left && enemyRect.left < wallRect.right && enemyRect.top < wallRect.bottom && enemyRect.bottom > wallRect.top) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
 
