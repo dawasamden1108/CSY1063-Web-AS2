@@ -2,6 +2,9 @@ let upPressed = false;
 let downPressed = false;
 let leftPressed = false;
 let rightPressed = false;
+let lives = 3;
+
+document.querySelector(".lives h1").textContent = `Lives: ${lives}`;
 
 const main = document.querySelector('main');
 
@@ -60,14 +63,6 @@ const playerMouth = player.querySelector('.mouth');
 let playerTop = 0;
 let playerLeft = 0;
 
-function checkGameOver() {
-    if (checkEnemyCollision()) {
-        alert("Game Over!");
-        // Optionally, reload the page or reset the game state
-        location.reload();
-    }
-}
-
 setInterval(function() {
     if (downPressed && !checkWallCollisionForPlayer('down')) {
         playerTop++;
@@ -90,7 +85,10 @@ setInterval(function() {
         playerMouth.classList = 'right';
         checkPointCollection();
     }
-    checkGameOver();
+    checkEnemyCollision();
+    // if (checkEnemyCollision()) {
+    //     checkGameOver();
+    // }
 }, 10);
 
 function checkWallCollisionForPlayer(direction) {
@@ -118,7 +116,7 @@ function checkWinCondition() {
     const points = document.querySelectorAll('.point');
     if (points.length === 0) {
         alert("You Win!");
-        // Optionally, reload the page or reset the game state
+        // to reload the page or reset the game state
         location.reload();
     }
 }
@@ -211,13 +209,30 @@ function moveEnemies() {
                 break;
         }
         
-        console.log(`Enemy new position: top: ${newTop}, left: ${newLeft}`);
-
         enemy.style.top = newTop + 'px';
         enemy.style.left = newLeft + 'px';
     });
 }
-setInterval(moveEnemies, 1000);
+// setInterval(moveEnemies, 1000);
+
+function handleGameOver() {
+
+    console.log("dead animation starts"); 
+    // Trigger the death animation
+    player.classList.add('dead');
+
+   // Event listener for animation ends
+   player.addEventListener('animationend', function onAnimationEnd() {
+    console.log("Animation ended, attempting to reload");
+    
+    // alert("Game Over!");
+    location.reload();
+
+player.removeEventListener('animationend', onAnimationEnd);
+});
+}
+
+
 
 function checkEnemyCollision() {
     const playerRect = player.getBoundingClientRect();
@@ -232,12 +247,22 @@ function checkEnemyCollision() {
             playerRect.left < enemyRect.right &&
             playerRect.right > enemyRect.left
         ) {
+            console.log("enemy detected");  
+                   
+            handleGameOver();
+
+            // Set cooldown to prevent multiple detections
+            collisionCooldown = true;
+            setTimeout(() => collisionCooldown = false, 3000);
+
             return true;
         }
     }
 
     return false;
 }
+
+setInterval(checkEnemyCollision,10);
 
 function checkWallCollisionForEnemy(enemy, direction) {
     const enemyRect = enemy.getBoundingClientRect();
