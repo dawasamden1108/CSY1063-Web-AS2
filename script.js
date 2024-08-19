@@ -18,16 +18,41 @@ startButton.addEventListener("click", () => {
 // Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 0, 1, 0, 0, 0, 0, 3, 1],
+    [1, 2, 0, 1, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [1, 0, 0, 1, 0, 3, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 3, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
+
+// Function to randomize enemy positions
+function randomizeEnemies(maze, enemyCount) {
+    let emptySpaces = [];
+
+    //to collect all empty spaces (where maze[y][x] === 0)
+    for (let y = 0; y < maze.length; y++) {
+        for (let x = 0; x < maze[y].length; x++) {
+            if (maze[y][x] === 0) {
+                emptySpaces.push({ y, x });
+            }
+        }
+    }
+
+    // to randomly place enemies in empty spaces
+    for (let i = 0; i < enemyCount; i++) {
+        if (emptySpaces.length === 0) break;
+        let randomIndex = Math.floor(Math.random() * emptySpaces.length);
+        let { y, x } = emptySpaces.splice(randomIndex, 1)[0];
+        maze[y][x] = 3;
+    }
+}
+
+// Randomize enemies in the maze
+randomizeEnemies(maze, 3);
 
 // Populates the maze in the HTML
 for (let y of maze) {
@@ -228,7 +253,8 @@ function handleGameOver() {
     // alert("Game Over!");
     location.reload();
 
-player.removeEventListener('animationend', onAnimationEnd);
+    player.removeEventListener('animationend', onAnimationEnd);
+    
 });
 }
 
