@@ -275,9 +275,23 @@ function handleGameOver() {
         console.log("Animation ended, displaying reset button");
         player.removeEventListener('animationend', onAnimationEnd);
 
-        location.reload();
-    } ) ;
-}
+          // to display reset button
+          const resetButton = document.createElement('button');
+          resetButton.innerText = 'Reset Game';
+          resetButton.style.position = 'absolute';
+          resetButton.style.top = '50%';
+          resetButton.style.left = '50%';
+          resetButton.style.transform = 'translate(-50%, -50%)';
+          resetButton.style.padding = '10px 20px';
+          resetButton.style.fontSize = '16px';
+          document.body.appendChild(resetButton);
+  
+          resetButton.addEventListener('click', function() {
+            
+            location.reload();
+          });
+      } ) ;
+  }
 
 
 
