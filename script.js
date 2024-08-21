@@ -8,11 +8,15 @@ document.querySelector(".lives h1").textContent = `Lives: ${lives}`;
 
 const main = document.querySelector('main');
 
-// To remove start button
+// To remove start button when clicked upon and to make the enemies move
+let gameOver = false;
+let enemyMovementInterval;
+
 const startButton = document.querySelector(".start");
 
 startButton.addEventListener("click", () => {
     startButton.remove();
+    enemyMovementInterval = setInterval(moveEnemies, 2000);
 });
 
 // Player = 2, Wall = 1, Enemy = 3, Point = 0
@@ -209,58 +213,77 @@ function keyUp(event) {
     }
 } 
 
-//-------------------------------------------------
+//------------------------------------------------- Modified code for all enemies fuctions
 
 function moveEnemies() {
+    if (gameOver) return;
+
     const enemies = document.querySelectorAll('.enemy');
     enemies.forEach(enemy => {
-        const direction = Math.floor(Math.random() * 4);
-        const enemyRect = enemy.getBoundingClientRect();
+        const directions = [0, 1, 2, 3]; // up, down, left, right
         let newTop = parseInt(enemy.style.top) || 0;
         let newLeft = parseInt(enemy.style.left) || 0;
 
-        switch (direction) {
-            case 0: // up
-                if (!checkWallCollisionForEnemy(enemy, 'up')) newTop -= 60;
-                break;
-            case 1: // down
-                if (!checkWallCollisionForEnemy(enemy, 'down')) newTop += 60;
-                break;
-            case 2: // left
-                if (!checkWallCollisionForEnemy(enemy, 'left')) newLeft -= 60;
-                break;
-            case 3: // right
-                if (!checkWallCollisionForEnemy(enemy, 'right')) newLeft += 60;
-                break;
+        let moved = false;
+        while (directions.length > 0 && !moved) {
+            const randomIndex = Math.floor(Math.random() * directions.length);
+            const direction = directions.splice(randomIndex, 1)[0];
+
+            switch (direction) {
+                case 0: // up
+                    if (!checkWallCollisionForEnemy(enemy, 'up')) {
+                        newTop -= 60;
+                        moved = true;
+                    }
+                    break;
+                case 1: // down
+                    if (!checkWallCollisionForEnemy(enemy, 'down')) {
+                        newTop += 60;
+                        moved = true;
+                    }
+                    break;
+                case 2: // left
+                    if (!checkWallCollisionForEnemy(enemy, 'left')) {
+                        newLeft -= 60;
+                        moved = true;
+                    }
+                    break;
+                case 3: // right
+                    if (!checkWallCollisionForEnemy(enemy, 'right')) {
+                        newLeft += 60;
+                        moved = true;
+                    }
+                    break;
+            }
         }
-        
-        enemy.style.top = newTop + 'px';
-        enemy.style.left = newLeft + 'px';
+
+        if (moved) {
+            enemy.style.top = newTop + 'px';
+            enemy.style.left = newLeft + 'px';
+        }
     });
 }
 // setInterval(moveEnemies, 1000);
 
 function handleGameOver() {
-
+    gameOver = true;
+    clearInterval(enemyMovementInterval);
     console.log("dead animation starts"); 
-    // Trigger the death animation
     player.classList.add('dead');
 
-   // Event listener for animation ends
-   player.addEventListener('animationend', function onAnimationEnd() {
-    console.log("Animation ended, attempting to reload");
-    
-    // alert("Game Over!");
-    location.reload();
+    player.addEventListener('animationend', function onAnimationEnd() {
+        console.log("Animation ended, displaying reset button");
+        player.removeEventListener('animationend', onAnimationEnd);
 
-    player.removeEventListener('animationend', onAnimationEnd);
-    
-});
+        location.reload();
+    } ) ;
 }
 
 
 
 function checkEnemyCollision() {
+    if (gameOver) return false;
+
     const playerRect = player.getBoundingClientRect();
     const enemies = document.querySelectorAll('.enemy');
 
@@ -274,10 +297,8 @@ function checkEnemyCollision() {
             playerRect.right > enemyRect.left
         ) {
             console.log("enemy detected");  
-                   
             handleGameOver();
 
-            // Set cooldown to prevent multiple detections
             collisionCooldown = true;
             setTimeout(() => collisionCooldown = false, 3000);
 
@@ -297,13 +318,13 @@ function checkWallCollisionForEnemy(enemy, direction) {
     for (let wall of walls) {
         const wallRect = wall.getBoundingClientRect();
 
-        if (direction === 'up' && enemyRect.top - 20 < wallRect.bottom && enemyRect.bottom > wallRect.top && enemyRect.left < wallRect.right && enemyRect.right > wallRect.left) {
+        if (direction === 'up' && enemyRect.top - 60 < wallRect.bottom && enemyRect.bottom > wallRect.top && enemyRect.left < wallRect.right && enemyRect.right > wallRect.left) {
             return true;
-        } else if (direction === 'down' && enemyRect.bottom + 20 > wallRect.top && enemyRect.top < wallRect.bottom && enemyRect.left < wallRect.right && enemyRect.right > wallRect.left) {
+        } else if (direction === 'down' && enemyRect.bottom + 60 > wallRect.top && enemyRect.top < wallRect.bottom && enemyRect.left < wallRect.right && enemyRect.right > wallRect.left) {
             return true;
-        } else if (direction === 'left' && enemyRect.left - 20 < wallRect.right && enemyRect.right > wallRect.left && enemyRect.top < wallRect.bottom && enemyRect.bottom > wallRect.top) {
+        } else if (direction === 'left' && enemyRect.left - 60 < wallRect.right && enemyRect.right > wallRect.left && enemyRect.top < wallRect.bottom && enemyRect.bottom > wallRect.top) {
             return true;
-        } else if (direction === 'right' && enemyRect.right + 20 > wallRect.left && enemyRect.left < wallRect.right && enemyRect.top < wallRect.bottom && enemyRect.bottom > wallRect.top) {
+        } else if (direction === 'right' && enemyRect.right + 60 > wallRect.left && enemyRect.left < wallRect.right && enemyRect.top < wallRect.bottom && enemyRect.bottom > wallRect.top) {
             return true;
         }
     }
