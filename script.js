@@ -2,7 +2,7 @@ let upPressed = false;
 let downPressed = false;
 let leftPressed = false;
 let rightPressed = false;
-let lives = 3;
+let lives =3;
 
 document.querySelector(".lives h1").textContent = `Lives: ${lives}`;
 
@@ -92,6 +92,41 @@ const playerMouth = player.querySelector('.mouth');
 let playerTop = 0;
 let playerLeft = 0;
 
+// To move using the arrow buttons displayed in the game
+const upButton = document.getElementById('ubttn');
+const downButton = document.getElementById('dbttn');
+const leftButton = document.getElementById('lbttn');
+const rightButton = document.getElementById('rbttn');
+
+upButton.addEventListener('mousedown', () => {      //for up arrow key (ubttn) 
+    upPressed = true;
+});
+upButton.addEventListener('mouseup', () => {
+    upPressed = false;
+});
+
+downButton.addEventListener('mousedown', () => {     //for down arrow key (dbttn) 
+    downPressed = true;
+});
+downButton.addEventListener('mouseup', () => {
+    downPressed = false;
+});
+
+leftButton.addEventListener('mousedown', () => {      //for left arrow key (lbttn) 
+    leftPressed = true; 
+});
+leftButton.addEventListener('mouseup', () => {
+    leftPressed = false;
+});
+
+rightButton.addEventListener('mousedown', () => {      //for right arrow key (rbttn) 
+    rightPressed = true;
+});
+rightButton.addEventListener('mouseup', () => {
+    rightPressed = false;
+});
+
+
 setInterval(function() {
     if (downPressed && !checkWallCollisionForPlayer('down')) {
         playerTop++;
@@ -115,9 +150,7 @@ setInterval(function() {
         checkPointCollection();
     }
     checkEnemyCollision();
-    // if (checkEnemyCollision()) {
-    //     checkGameOver();
-    // }
+
 }, 10);
 
 function checkWallCollisionForPlayer(direction) {
