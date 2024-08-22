@@ -153,6 +153,7 @@ setInterval(function() {
 
 }, 10);
 
+// to identify collision with walls 
 function checkWallCollisionForPlayer(direction) {
     const playerRect = player.getBoundingClientRect();
     const walls = document.querySelectorAll(".wall");
@@ -174,16 +175,7 @@ function checkWallCollisionForPlayer(direction) {
     return false;
 }
 
-function checkWinCondition() {
-    const points = document.querySelectorAll('.point');
-    if (points.length === 0) {
-        alert("You Win!");
-        // to reload the page or reset the game state
-        location.reload();
-    }
-}
-
-// To collect pellets
+// To collect points and update score
 let score = 0;
 function checkPointCollection() {
     const points = document.querySelectorAll('.point');
@@ -207,8 +199,7 @@ function checkPointCollection() {
     });
 }
 
-// setInterval(checkPointCollection, 100);
-
+// To detect key presses
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
@@ -248,6 +239,7 @@ function keyUp(event) {
 
 //------------------------------------------------- Modified code for all enemies fuctions
 
+// To move enemies
 function moveEnemies() {
     if (gameOver) return;
 
@@ -296,38 +288,8 @@ function moveEnemies() {
         }
     });
 }
-// setInterval(moveEnemies, 1000);
 
-function handleGameOver() {
-    gameOver = true;
-    clearInterval(enemyMovementInterval);
-    console.log("dead animation starts"); 
-    player.classList.add('dead');
-
-    player.addEventListener('animationend', function onAnimationEnd() {
-        console.log("Animation ended, displaying reset button");
-        player.removeEventListener('animationend', onAnimationEnd);
-
-          // to display reset button
-          const resetButton = document.createElement('button');
-          resetButton.innerText = 'Reset Game';
-          resetButton.style.position = 'absolute';
-          resetButton.style.top = '50%';
-          resetButton.style.left = '50%';
-          resetButton.style.transform = 'translate(-50%, -50%)';
-          resetButton.style.padding = '10px 20px';
-          resetButton.style.fontSize = '16px';
-          document.body.appendChild(resetButton);
-  
-          resetButton.addEventListener('click', function() {
-            
-            location.reload();
-          });
-      } ) ;
-  }
-
-
-
+// To check collision with enemies
 function checkEnemyCollision() {
     if (gameOver) return false;
 
@@ -358,6 +320,7 @@ function checkEnemyCollision() {
 
 setInterval(checkEnemyCollision,10);
 
+// To check collision with walls for enemies
 function checkWallCollisionForEnemy(enemy, direction) {
     const enemyRect = enemy.getBoundingClientRect();
     const walls = document.querySelectorAll(".wall");
@@ -378,6 +341,83 @@ function checkWallCollisionForEnemy(enemy, direction) {
 
     return false;
 }
+
+//---------------------------------------------------------------Game logic
+
+// To handle game over
+function handleGameOver() {
+    gameOver = true;
+    clearInterval(enemyMovementInterval);
+    console.log("dead animation starts"); 
+    player.classList.add('dead');
+
+    player.addEventListener('animationend', function onAnimationEnd() {
+        console.log("Animation ended, displaying reset button");
+        player.removeEventListener('animationend', onAnimationEnd);
+
+        // Prompt the player to enter their name
+        const playerName = prompt(`Game Over! Your score is ${score}. Enter your name to register in the leaderboard:`, "Unknown Player");
+        saveScore(playerName || "Unknown Player", score);
+
+          // to display reset button
+          const resetButton = document.createElement('button');
+          resetButton.innerText = 'Restart Game';
+          resetButton.style.position = 'absolute';
+          resetButton.style.top = '50%';
+          resetButton.style.left = '50%';
+          resetButton.style.transform = 'translate(-50%, -50%)';
+          resetButton.style.padding = '10px 20px';
+          resetButton.style.fontSize = '16px';
+          document.body.appendChild(resetButton);
+  
+          resetButton.addEventListener('click', function() {
+            
+            location.reload();
+          });
+
+          updateLeaderboard();
+
+      }) ;
+  }
+
+//   To check win condition
+function checkWinCondition() {
+    const points = document.querySelectorAll('.point');
+    if (points.length === 0) {
+        const playerName = prompt(`You Win! Your score is ${score}. Enter your name to register in the leaderboard:`, "Unknown Player");
+        saveScore(playerName || "Unknown Player", score);
+        alert("You Win!");
+        // to reload the page or reset the game state
+        location.reload();
+    }
+}
+
+// To save the score in the local storage
+function saveScore(name, score) {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    leaderboard.push({ name, score });
+    leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+}
+
+// To update the leaderboard
+function updateLeaderboard() {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    const leaderboardElement = document.querySelector('.leaderboard ol');
+    leaderboardElement.innerHTML = ''; // Clear existing leaderboard
+
+    leaderboard.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.name}........${entry.score}`;
+        leaderboardElement.appendChild(li);
+    });
+}
+
+//To Call updateLeaderboard when the page loads
+document.addEventListener('DOMContentLoaded', updateLeaderboard);
+
+
+
 
 
 
