@@ -368,6 +368,7 @@ function handleGameOver() {
           resetButton.style.transform = 'translate(-50%, -50%)';
           resetButton.style.padding = '10px 20px';
           resetButton.style.fontSize = '16px';
+         
           document.body.appendChild(resetButton);
   
           resetButton.addEventListener('click', function() {
@@ -395,7 +396,16 @@ function checkWinCondition() {
 // To save the score in the local storage
 function saveScore(name, score) {
     const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-    leaderboard.push({ name, score });
+    const existingEntry = leaderboard.find(entry => entry.name === name);
+
+    if (existingEntry) {
+        if (score > existingEntry.score) {
+            existingEntry.score = score;
+        }
+    } else {
+        leaderboard.push({ name, score });
+    }
+
     leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
     localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
 }
@@ -416,6 +426,45 @@ function updateLeaderboard() {
 //To Call updateLeaderboard when the page loads
 document.addEventListener('DOMContentLoaded', updateLeaderboard);
 
+// -----------------------------------------------------------------for reset icon
+
+// To create the reset icon
+const resetIcon = document.createElement('div');
+resetIcon.id = 'resetIcon';
+resetIcon.innerHTML = '&#x21bb;'; // html code for the reset icon
+
+// Styling for the reset icon
+resetIcon.style.fontSize = '30px';
+resetIcon.style.cursor = 'pointer';
+resetIcon.style.backgroundColor = 'black';
+resetIcon.style.padding = '10px 0px 0px 0px';
+resetIcon.style.borderRadius = '5px';
+resetIcon.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
+resetIcon.style.transition = 'background-color 0.3s';
+resetIcon.style.display = 'inline-block';
+resetIcon.style.marginTop = '10px';
+resetIcon.style.height = '15px';  // !later to be modified
+
+
+//to add hover effect
+// resetIcon.addEventListener('mouseenter', () => {
+//     resetIcon.style.backgroundColor = '#e0e0e0';
+// });
+// resetIcon.addEventListener('mouseleave', () => {
+//     resetIcon.style.backgroundColor = '#f0f0f0';
+// });
+
+// To append the reset icon below the score
+const scoreContainer = document.querySelector('.score');
+scoreContainer.appendChild(resetIcon);
+
+// To reset the game when the reset icon is clicked
+resetIcon.addEventListener('click', () => {
+    // Clear the leaderboard
+    localStorage.removeItem('leaderboard');
+
+    location.reload();
+});
 
 
 
