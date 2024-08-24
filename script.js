@@ -2,9 +2,6 @@ let upPressed = false;
 let downPressed = false;
 let leftPressed = false;
 let rightPressed = false;
-let lives =3;
-
-document.querySelector(".lives h1").textContent = `Lives: ${lives}`;
 
 const main = document.querySelector('main');
 
@@ -18,6 +15,7 @@ startButton.addEventListener("click", () => {
     startButton.remove();
     enemyMovementInterval = setInterval(moveEnemies, 2000);
 });
+
 
 // Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
@@ -289,9 +287,15 @@ function moveEnemies() {
     });
 }
 
+
+// Variables to track collision cooldown and lives
+let collisionCooldown = false;
+let lives = 3;
+let collisionCount = 0;
+
 // To check collision with enemies
 function checkEnemyCollision() {
-    if (gameOver) return false;
+    if (gameOver || collisionCooldown) return false;
 
     const playerRect = player.getBoundingClientRect();
     const enemies = document.querySelectorAll('.enemy');
@@ -299,18 +303,36 @@ function checkEnemyCollision() {
     for (let enemy of enemies) {
         const enemyRect = enemy.getBoundingClientRect();
 
-        if (
-            playerRect.top < enemyRect.bottom &&
+        if (playerRect.top < enemyRect.bottom &&
             playerRect.bottom > enemyRect.top &&
             playerRect.left < enemyRect.right &&
-            playerRect.right > enemyRect.left
-        ) {
-            console.log("enemy detected");  
-            handleGameOver();
+            playerRect.right > enemyRect.left) {
+            console.log("enemy detected");
 
+            // To display hit animation and prevent movement for 1.5 seconds
+            player.classList.add('hit');
             collisionCooldown = true;
-            setTimeout(() => collisionCooldown = false, 3000);
+            setTimeout(() => {
+                player.classList.remove('hit');
+                collisionCooldown = false;
+                console.log("cooldown over");
 
+            }, 1500);
+
+            const livesList = document.querySelector('.lives ul');
+            if (livesList.children.length > 0) {
+                livesList.removeChild(livesList.children[0]);
+                console.log("life removed");
+
+            }
+
+            lives--;
+            collisionCount++;
+            if (lives <= 0 && collisionCount >= 3) {
+                handleGameOver();
+                console.log("game over");
+
+            }
             return true;
         }
     }
@@ -466,6 +488,8 @@ resetIcon.addEventListener('click', () => {
     location.reload();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+});
 
 
 
