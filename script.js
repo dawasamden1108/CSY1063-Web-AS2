@@ -19,10 +19,8 @@ startButton.addEventListener("click", () => {
     startMusic.play();
     startMusic.addEventListener('ended', () => {
         gameReady = true;
-        setTimeout(() => {
-            gameStarted = true;
-            enemyMovementInterval = setInterval(moveEnemies, 2000);
-        }, 4000); // 4 seconds delay
+        gameStarted = true;
+        enemyMovementInterval = setInterval(moveEnemies, 2000);
     });
 });
 
@@ -527,6 +525,82 @@ resetIcon.addEventListener('click', () => {
     localStorage.removeItem('leaderboard');
 
     location.reload();
+});
+
+//----------------------------------------------------------for pause icon
+
+// Create the pause icon
+const pauseIcon = document.createElement('div');
+pauseIcon.id = 'pauseIcon';
+pauseIcon.innerHTML = '&#10074;&#10074;'; // HTML code for the pause icon
+
+// Styling for the pause icon
+pauseIcon.style.fontSize = '30px';
+pauseIcon.style.cursor = 'pointer';
+pauseIcon.style.backgroundColor = 'black';
+pauseIcon.style.padding = '10px 10px 0px 0px';
+pauseIcon.style.borderRadius = '5px';
+pauseIcon.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
+pauseIcon.style.transition = 'background-color 0.3s';
+pauseIcon.style.display = 'inline-block';
+pauseIcon.style.marginTop = '10px';
+pauseIcon.style.height = '15px';  // !later to be modified
+pauseIcon.style.marginRight = '10px'; // Add margin to the right to separate from reset icon
+
+// Append the pause icon to the score container
+scoreContainer.insertBefore(pauseIcon, resetIcon);
+
+// Add event listener to pause the game when the pause icon is clicked
+pauseIcon.addEventListener('click', () => {
+    if (gameStarted) {
+        clearInterval(enemyMovementInterval);
+        gameStarted = false;
+        pauseIcon.innerHTML = '&#9654;'; // Change to play icon
+    } else {
+        enemyMovementInterval = setInterval(moveEnemies, 2000);
+        gameStarted = true;
+        pauseIcon.innerHTML = '&#10074;&#10074;'; // Change back to pause icon
+    }
+});
+
+// -----------------------------------------------------------------------for mute icon
+
+// Create the mute icon
+const muteIcon = document.createElement('div');
+muteIcon.id = 'muteIcon';
+muteIcon.innerHTML = '&#128263;'; // HTML code for the mute icon
+
+// Styling for the mute icon
+muteIcon.style.fontSize = '30px';
+muteIcon.style.cursor = 'pointer';
+muteIcon.style.backgroundColor = 'black';
+muteIcon.style.padding = '10px 0px 0px 10px';
+muteIcon.style.borderRadius = '5px';
+muteIcon.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
+muteIcon.style.transition = 'background-color 0.3s';
+muteIcon.style.display = 'inline-block';
+muteIcon.style.marginTop = '10px';
+muteIcon.style.height = '15px';  // !later to be modified
+muteIcon.style.marginRight = '10px'; // Add margin to the right to separate from other icons
+
+// Append the mute icon to the score container, just to the right of the reset icon
+scoreContainer.insertBefore(muteIcon, resetIcon.nextSibling);
+
+// Add event listener to mute/unmute the game when the mute icon is clicked
+let isMuted = false;
+muteIcon.addEventListener('click', () => {
+    isMuted = !isMuted;
+    if (isMuted) {
+        startMusic.muted = true;
+        hitMusic.muted = true;
+        deadMusic.muted = true;
+        muteIcon.innerHTML = '&#128264;'; // Change to unmute icon
+    } else {
+        startMusic.muted = false;
+        hitMusic.muted = false;
+        deadMusic.muted = false;
+        muteIcon.innerHTML = '&#128263;'; // Change back to mute icon
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
