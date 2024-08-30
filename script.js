@@ -3,17 +3,27 @@ let downPressed = false;
 let leftPressed = false;
 let rightPressed = false;
 
-const main = document.querySelector('main');
+const main = document.getElementsByTagName('main')[0];
 
 // To remove start button when clicked upon and to make the enemies move
 let gameOver = false;
 let enemyMovementInterval;
+ 
+const startButton =  document.getElementsByClassName("start")[0];
 
-const startButton = document.querySelector(".start");
+let gameStarted = false;
+let gameReady = false;
 
 startButton.addEventListener("click", () => {
     startButton.remove();
-    enemyMovementInterval = setInterval(moveEnemies, 2000);
+    startMusic.play();
+    startMusic.addEventListener('ended', () => {
+        gameReady = true;
+        setTimeout(() => {
+            gameStarted = true;
+            enemyMovementInterval = setInterval(moveEnemies, 2000);
+        }, 4000); // 4 seconds delay
+    });
 });
 
 
@@ -70,6 +80,7 @@ for (let y of maze) {
                 block.id = 'player';
                 let mouth = document.createElement('div');
                 mouth.classList.add('mouth');
+                // player.style.zIndex = '100';
                 block.appendChild(mouth);
                 break;
             case 3:
@@ -85,8 +96,8 @@ for (let y of maze) {
     }
 }
 
-const player = document.querySelector('#player');
-const playerMouth = player.querySelector('.mouth');
+const player = document.getElementById('player');
+const playerMouth = player.getElementsByClassName('mouth')[0];
 let playerTop = 0;
 let playerLeft = 0;
 
@@ -97,7 +108,9 @@ const leftButton = document.getElementById('lbttn');
 const rightButton = document.getElementById('rbttn');
 
 upButton.addEventListener('mousedown', () => {      //for up arrow key (ubttn) 
-    upPressed = true;
+    if (gameReady) {
+        upPressed = true;
+    }
 });
 upButton.addEventListener('mouseup', () => {
     upPressed = false;
@@ -126,35 +139,43 @@ rightButton.addEventListener('mouseup', () => {
 
 
 setInterval(function() {
-    if (downPressed && !checkWallCollisionForPlayer('down')) {
-        playerTop++;
-        player.style.top = playerTop + 'px';
-        playerMouth.classList = 'down'; 
-        checkPointCollection();
-    } else if (upPressed && !checkWallCollisionForPlayer('up')) {
-        playerTop--;
-        player.style.top = playerTop + 'px';
-        playerMouth.classList = 'up';
-        checkPointCollection();
-    } else if (leftPressed && !checkWallCollisionForPlayer('left')) {
-        playerLeft--;
-        player.style.left = playerLeft + 'px';
-        playerMouth.classList = 'left';
-        checkPointCollection();
-    } else if (rightPressed && !checkWallCollisionForPlayer('right')) {
-        playerLeft++;
-        player.style.left = playerLeft + 'px';
-        playerMouth.classList = 'right';
-        checkPointCollection();
+    if (gameOver || !gameReady) return;
+
+    if (!hitAnimationActive) {
+        if (downPressed && !checkWallCollisionForPlayer('down')) {
+            playerTop++;
+            player.style.top = playerTop + 'px';
+            playerMouth.classList = 'down'; 
+            checkPointCollection();
+        } else if (upPressed && !checkWallCollisionForPlayer('up')) {
+            playerTop--;
+            player.style.top = playerTop + 'px';
+            playerMouth.classList = 'up';
+            checkPointCollection();
+        } else if (leftPressed && !checkWallCollisionForPlayer('left')) {
+            playerLeft--;
+            player.style.left = playerLeft + 'px';
+            playerMouth.classList = 'left';
+            checkPointCollection();
+        } else if (rightPressed && !checkWallCollisionForPlayer('right')) {
+            playerLeft++;
+            player.style.left = playerLeft + 'px';
+            playerMouth.classList = 'right';
+            checkPointCollection();
+        }
     }
+
     checkEnemyCollision();
+    // moveEnemies();
 
 }, 10);
+
+// setInterval(movePlayer, 10);
 
 // to identify collision with walls 
 function checkWallCollisionForPlayer(direction) {
     const playerRect = player.getBoundingClientRect();
-    const walls = document.querySelectorAll(".wall");
+    const walls = document.getElementsByClassName("wall");
 
     for (let wall of walls) {
         const wallRect = wall.getBoundingClientRect();
@@ -173,6 +194,7 @@ function checkWallCollisionForPlayer(direction) {
     return false;
 }
 
+
 // To collect points and update score
 let score = 0;
 function checkPointCollection() {
@@ -188,10 +210,9 @@ function checkPointCollection() {
             playerRect.left < pointRect.right &&
             playerRect.right > pointRect.left
         ) {
-            // console.log("point");
             point.classList.remove("point"); 
-            score+=10;
-            document.querySelector(".score p").textContent = score;
+            score += 10;
+            document.getElementsByClassName("score")[0].getElementsByTagName("p")[0].textContent = score;
             checkWinCondition();
         }
     });
@@ -202,6 +223,8 @@ document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
 function keyDown(event) {
+    if (!gameReady) return;
+
     switch (event.key) {
         case 'ArrowUp':
             upPressed = true;
@@ -219,6 +242,8 @@ function keyDown(event) {
 }
 
 function keyUp(event) {
+    if (!gameReady) return;
+
     switch (event.key) {
         case 'ArrowUp':
             upPressed = false;
@@ -233,25 +258,26 @@ function keyUp(event) {
             rightPressed = false;
             break;
     }
-} 
+}
 
 //------------------------------------------------- Modified code for all enemies fuctions
 
 // To move enemies
 function moveEnemies() {
-    if (gameOver) return;
+    if (gameOver || !gameStarted) return;
 
-    const enemies = document.querySelectorAll('.enemy');
-    enemies.forEach(enemy => {
+    const enemies = document.getElementsByClassName('enemy');
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
         const directions = [0, 1, 2, 3]; // up, down, left, right
         let newTop = parseInt(enemy.style.top) || 0;
         let newLeft = parseInt(enemy.style.left) || 0;
-
+    
         let moved = false;
         while (directions.length > 0 && !moved) {
             const randomIndex = Math.floor(Math.random() * directions.length);
             const direction = directions.splice(randomIndex, 1)[0];
-
+    
             switch (direction) {
                 case 0: // up
                     if (!checkWallCollisionForEnemy(enemy, 'up')) {
@@ -279,26 +305,26 @@ function moveEnemies() {
                     break;
             }
         }
-
+    
         if (moved) {
             enemy.style.top = newTop + 'px';
             enemy.style.left = newLeft + 'px';
         }
-    });
+    }
 }
 
 
 // Variables to track collision cooldown and lives
 let collisionCooldown = false;
 let lives = 3;
-let collisionCount = 0;
+let hitAnimationActive = false;
 
 // To check collision with enemies
 function checkEnemyCollision() {
-    if (gameOver || collisionCooldown) return false;
+    if (gameOver || collisionCooldown) return;
 
     const playerRect = player.getBoundingClientRect();
-    const enemies = document.querySelectorAll('.enemy');
+    const enemies = document.getElementsByClassName('enemy');
 
     for (let enemy of enemies) {
         const enemyRect = enemy.getBoundingClientRect();
@@ -311,29 +337,41 @@ function checkEnemyCollision() {
 
             // To display hit animation and prevent movement for 1.5 seconds
             player.classList.add('hit');
-            collisionCooldown = true;
+            hitMusic.play();
+            hitAnimationActive = true;
+
+            // Stop hit sound after 1.5 seconds
+            setTimeout(() => {
+                hitMusic.pause();
+                hitMusic.currentTime = 0;
+            }, 1500);
+
             setTimeout(() => {
                 player.classList.remove('hit');
-                collisionCooldown = false;
-                console.log("cooldown over");
+                console.log("hit animation over");
+                hitAnimationActive = false;
+
+                const livesList = document.getElementsByClassName('lives')[0].getElementsByTagName('ul')[0];
+                if (livesList.children.length > 0) {
+                    livesList.removeChild(livesList.children[0]);
+                    console.log("life removed");
+                }
+
+                lives--;
+                if (lives <= 0) {
+                    handleGameOver();
+                    console.log("game over");
+                }
+
+                // Set a longer cooldown of 4 seconds
+                setTimeout(() => {
+                    collisionCooldown = false;
+                }, 4000);
 
             }, 1500);
 
-            const livesList = document.querySelector('.lives ul');
-            if (livesList.children.length > 0) {
-                livesList.removeChild(livesList.children[0]);
-                console.log("life removed");
-
-            }
-
-            lives--;
-            collisionCount++;
-            if (lives <= 0 && collisionCount >= 3) {
-                handleGameOver();
-                console.log("game over");
-
-            }
-            return true;
+            collisionCooldown = true;
+            return true; // Exit the loop after handling one collision
         }
     }
 
@@ -342,10 +380,11 @@ function checkEnemyCollision() {
 
 setInterval(checkEnemyCollision,10);
 
+
 // To check collision with walls for enemies
 function checkWallCollisionForEnemy(enemy, direction) {
     const enemyRect = enemy.getBoundingClientRect();
-    const walls = document.querySelectorAll(".wall");
+    const walls = document.getElementsByClassName("wall");
 
     for (let wall of walls) {
         const wallRect = wall.getBoundingClientRect();
@@ -372,6 +411,7 @@ function handleGameOver() {
     clearInterval(enemyMovementInterval);
     console.log("dead animation starts"); 
     player.classList.add('dead');
+    deadMusic.play();
 
     player.addEventListener('animationend', function onAnimationEnd() {
         console.log("Animation ended, displaying reset button");
@@ -381,27 +421,25 @@ function handleGameOver() {
         const playerName = prompt(`Game Over! Your score is ${score}. Enter your name to register in the leaderboard:`, "Unknown Player");
         saveScore(playerName || "Unknown Player", score);
 
-          // to display reset button
-          const resetButton = document.createElement('button');
-          resetButton.innerText = 'Restart Game';
-          resetButton.style.position = 'absolute';
-          resetButton.style.top = '50%';
-          resetButton.style.left = '50%';
-          resetButton.style.transform = 'translate(-50%, -50%)';
-          resetButton.style.padding = '10px 20px';
-          resetButton.style.fontSize = '16px';
-         
-          document.body.appendChild(resetButton);
-  
-          resetButton.addEventListener('click', function() {
-            
+        // to display reset button
+        const resetButton = document.createElement('button');
+        resetButton.innerText = 'Restart Game';
+        resetButton.style.position = 'absolute';
+        resetButton.style.top = '50%';
+        resetButton.style.left = '50%';
+        resetButton.style.transform = 'translate(-50%, -50%)';
+        resetButton.style.padding = '10px 20px';
+        resetButton.style.fontSize = '16px';
+
+        document.body.appendChild(resetButton);
+
+        resetButton.addEventListener('click', function() {
             location.reload();
-          });
+        });
 
-          updateLeaderboard();
-
-      }) ;
-  }
+        updateLeaderboard();
+    });
+}
 
 //   To check win condition
 function checkWinCondition() {
@@ -435,7 +473,9 @@ function saveScore(name, score) {
 // To update the leaderboard
 function updateLeaderboard() {
     const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-    const leaderboardElement = document.querySelector('.leaderboard ol');
+    const leaderboardElements = document.getElementsByClassName('leaderboard')[0].getElementsByTagName('ol');
+    
+    const leaderboardElement = leaderboardElements[0];
     leaderboardElement.innerHTML = ''; // Clear existing leaderboard
 
     leaderboard.forEach(entry => {
@@ -476,8 +516,9 @@ resetIcon.style.height = '15px';  // !later to be modified
 //     resetIcon.style.backgroundColor = '#f0f0f0';
 // });
 
+
 // To append the reset icon below the score
-const scoreContainer = document.querySelector('.score');
+const scoreContainer = document.getElementsByClassName('score')[0];
 scoreContainer.appendChild(resetIcon);
 
 // To reset the game when the reset icon is clicked
@@ -490,6 +531,19 @@ resetIcon.addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
 });
+
+// ---------------------------------------------------------------------- for music
+
+// Create audio elements dynamically
+const startMusic = new Audio('music/pacman_beginning.wav');
+const hitMusic = new Audio('music/pacman_collision.wav');
+const deadMusic = new Audio('music/pacman_dead.wav');
+
+// Set the volume if needed
+// startSound.volume = 0.5;
+// hitSound.volume = 0.5;
+// deadSound.volume = 0.5;
+
 
 
 
