@@ -28,15 +28,16 @@ startButton.addEventListener("click", () => {
 // Player = 2, Wall = 1, Enemy = 3, Point = 0
 let maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 2, 4, 0, 0, 0, 1, 4, 0, 1],
+    [1, 0, 4, 0, 4, 4, 4, 4, 4, 1],
+    [1, 0, 4, 4, 0, 0, 4, 4, 4, 1],
+    [1, 0, 4, 0, 1, 0, 4, 4, 4, 1],
+    [1, 1, 4, 0, 4, 4, 0, 4, 0, 1],
+    [1, 0, 4, 4, 0, 4, 4, 4, 1, 1],
+    [1, 4, 0, 0, 4, 0, 4, 4, 0, 1],
+    [1, 4, 4, 1, 0, 0, 0, 4, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+
 ];
 
 // Function to randomize enemy positions
@@ -63,6 +64,21 @@ function randomizeEnemies(maze, enemyCount) {
 
 // Randomize enemies in the maze
 randomizeEnemies(maze, 3);
+
+function randomizedMaze() {
+    let row = Math.floor(Math.random() * maze.length);
+    let column = Math.floor(Math.random() * maze[row].length);
+  
+    if (maze[row][column] == 0) {
+      maze[row][column] = 1;
+    } else {
+      randomizedMaze();
+    }
+  }
+  
+  randomizedMaze();
+  randomizedMaze();
+  randomizedMaze();
 
 // Populates the maze in the HTML
 for (let y of maze) {
@@ -166,7 +182,7 @@ setInterval(function() {
     checkEnemyCollision();
     // moveEnemies();
 
-}, 10);
+}, 8);
 
 // setInterval(movePlayer, 10);
 
@@ -199,6 +215,10 @@ function checkPointCollection() {
     const points = document.querySelectorAll('.point');
     const playerRect = player.getBoundingClientRect();
 
+    if(points.length === 0) {
+        nextlevel();
+    }
+
     points.forEach(point => {
         const pointRect = point.getBoundingClientRect();
 
@@ -211,7 +231,7 @@ function checkPointCollection() {
             point.classList.remove("point"); 
             score += 10;
             document.getElementsByClassName("score")[0].getElementsByTagName("p")[0].textContent = score;
-            checkWinCondition();
+            // checkWinCondition();
         }
     });
 }
@@ -440,16 +460,16 @@ function handleGameOver() {
 }
 
 //   To check win condition
-function checkWinCondition() {
-    const points = document.querySelectorAll('.point');
-    if (points.length === 0) {
-        const playerName = prompt(`You Win! Your score is ${score}. Enter your name to register in the leaderboard:`, "Unknown Player");
-        saveScore(playerName || "Unknown Player", score);
-        alert("You Win!");
-        // to reload the page or reset the game state
-        location.reload();
-    }
-}
+// function checkWinCondition() {
+//     const points = document.querySelectorAll('.point');
+//     if (points.length === 0) {
+//         const playerName = prompt(`You Win! Your score is ${score}. Enter your name to register in the leaderboard:`, "Unknown Player");
+//         saveScore(playerName || "Unknown Player", score);
+//         alert("You Win!");
+//         // to reload the page or reset the game state
+//         location.reload();
+//     }
+// }
 
 // To save the score in the local storage
 function saveScore(name, score) {
@@ -504,15 +524,6 @@ resetIcon.style.transition = 'background-color 0.3s';
 resetIcon.style.display = 'inline-block';
 resetIcon.style.marginTop = '10px';
 resetIcon.style.height = '15px';  // !later to be modified
-
-
-//to add hover effect
-// resetIcon.addEventListener('mouseenter', () => {
-//     resetIcon.style.backgroundColor = '#e0e0e0';
-// });
-// resetIcon.addEventListener('mouseleave', () => {
-//     resetIcon.style.backgroundColor = '#f0f0f0';
-// });
 
 
 // To append the reset icon below the score
@@ -616,10 +627,293 @@ const deadMusic = new Audio('music/pacman_dead.wav');
 // Set the volume if needed
 // startSound.volume = 0.5;
 // hitSound.volume = 0.5;
-// deadSound.volume = 0.5;
+// deadSound.volume = 0.5
+
+//---------------------------------------------------------------------------for level bar
+
+let level = 1; 
+
+// Create the level bar
+const levelBar = document.createElement('div');
+levelBar.id = 'levelBar';
+levelBar.style.position = 'fixed';
+levelBar.style.top = '10px';
+levelBar.style.left = '10px';
+levelBar.style.padding = '10px 0px 0px 10px';
+levelBar.style.color = '#fff';
+levelBar.style.fontSize = '20px';
+levelBar.style.borderRadius = '5px';
+levelBar.textContent = `Level: ${level}`;
+document.body.appendChild(levelBar);
 
 
+// -----------------------------------------------------------------------------------------for next level
 
+function nextlevel() {
+    level++; // Increment the level
+    levelBar.textContent = `Level: ${level}`; // Update the level bar
 
+    main.innerHTML = '';
+    // Player = 2, Wall = 1, Enemy = 3, Point = 0
+let maze = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 2, 4, 0, 0, 0, 1, 4, 0, 1],
+    [1, 0, 4, 0, 4, 4, 4, 4, 4, 1],
+    [1, 0, 4, 4, 0, 0, 4, 4, 4, 1],
+    [1, 0, 4, 0, 1, 0, 4, 4, 4, 1],
+    [1, 1, 4, 0, 4, 4, 0, 4, 0, 1],
+    [1, 0, 4, 4, 0, 4, 4, 4, 1, 1],
+    [1, 4, 0, 0, 4, 0, 4, 4, 0, 1],
+    [1, 4, 4, 1, 0, 0, 0, 4, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
+];
 
+// Function to randomize enemy positions
+// Randomize enemies in the maze
+randomizeEnemies(maze, 3);
+  
+randomizedMaze();
+randomizedMaze();
+randomizedMaze();
+
+// Populates the maze in the HTML
+for (let y of maze) {
+    for (let x of y) {
+        let block = document.createElement('div');
+        block.classList.add('block');
+
+        switch (x) {
+            case 1:
+                block.classList.add('wall');
+                break;
+            case 2:
+                block.id = 'player';
+                let mouth = document.createElement('div');
+                mouth.classList.add('mouth');
+                // player.style.zIndex = '100';
+                block.appendChild(mouth);
+                break;
+            case 3:
+                block.classList.add('enemy');
+                break;
+            default:
+                block.classList.add('point');
+                block.style.height = '1vh';
+                block.style.width = '1vh';
+        }
+
+        main.appendChild(block);
+    }
+
+    
+}
+
+const player = document.getElementById('player');
+    const playerMouth = player.getElementsByClassName('mouth')[0];
+    let playerTop = 0;
+    let playerLeft = 0;
+
+    setInterval(function() {
+        if (!gameReady) return;
+    
+        if (!hitAnimationActive) {
+            if (downPressed && !checkWallCollisionForPlayer('down')) {
+                playerTop++;
+                player.style.top = playerTop + 'px';
+                playerMouth.classList = 'down'; 
+                checkPointCollection();
+            } else if (upPressed && !checkWallCollisionForPlayer('up')) {
+                playerTop--;
+                player.style.top = playerTop + 'px';
+                playerMouth.classList = 'up';
+                checkPointCollection();
+            } else if (leftPressed && !checkWallCollisionForPlayer('left')) {
+                playerLeft--;
+                player.style.left = playerLeft + 'px';
+                playerMouth.classList = 'left';
+                checkPointCollection();
+            } else if (rightPressed && !checkWallCollisionForPlayer('right')) {
+                playerLeft++;
+                player.style.left = playerLeft + 'px';
+                playerMouth.classList = 'right';
+                checkPointCollection();
+            }
+        }
+    
+        checkEnemyCollision();
+        // moveEnemies();
+    
+    }, 8);
+
+function checkEnemyCollision() {
+    if (gameOver || collisionCooldown) return;
+
+    const playerRect = player.getBoundingClientRect();
+    const enemies = document.getElementsByClassName('enemy');
+
+    for (let enemy of enemies) {
+        const enemyRect = enemy.getBoundingClientRect();
+
+        if (playerRect.top < enemyRect.bottom &&
+            playerRect.bottom > enemyRect.top &&
+            playerRect.left < enemyRect.right &&
+            playerRect.right > enemyRect.left) {
+            console.log("enemy detected");
+
+            // To display hit animation and prevent movement for 1.5 seconds
+            player.classList.add('hit');
+            hitMusic.play();
+            hitAnimationActive = true;
+
+            // Stop hit sound after 1.5 seconds
+            setTimeout(() => {
+                hitMusic.pause();
+                hitMusic.currentTime = 0;
+            }, 1500);
+
+            setTimeout(() => {
+                player.classList.remove('hit');
+                console.log("hit animation over");
+                hitAnimationActive = false;
+
+                const livesList = document.getElementsByClassName('lives')[0].getElementsByTagName('ul')[0];
+                if (livesList.children.length > 0) {
+                    livesList.removeChild(livesList.children[0]);
+                    console.log("life removed");
+                }
+
+                lives--;
+                if (lives <= 0) {
+                    handleGameOver();
+                    console.log("game over");
+                }
+
+                // Set a longer cooldown of 4 seconds
+                setTimeout(() => {
+                    collisionCooldown = false;
+                }, 4000);
+
+            }, 1500);
+
+            collisionCooldown = true;
+            return true; // Exit the loop after handling one collision
+        }
+    }
+
+    return false;
+}
+
+setInterval(checkEnemyCollision,10);
+
+function checkWallCollisionForPlayer(direction) {
+    const playerRect = player.getBoundingClientRect();
+    const walls = document.getElementsByClassName("wall");
+
+    for (let wall of walls) {
+        const wallRect = wall.getBoundingClientRect();
+
+        if (direction === 'up' && playerRect.top - 1 < wallRect.bottom && playerRect.bottom > wallRect.top && playerRect.left < wallRect.right && playerRect.right > wallRect.left) {
+            return true;
+        } else if (direction === 'down' && playerRect.bottom + 1 > wallRect.top && playerRect.top < wallRect.bottom && playerRect.left < wallRect.right && playerRect.right > wallRect.left) {
+            return true;
+        } else if (direction === 'left' && playerRect.left - 1 < wallRect.right && playerRect.right > wallRect.left && playerRect.top < wallRect.bottom && playerRect.bottom > wallRect.top) {
+            return true;
+        } else if (direction === 'right' && playerRect.right + 1 > wallRect.left && playerRect.left < wallRect.right && playerRect.top < wallRect.bottom && playerRect.bottom > wallRect.top) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function checkPointCollection() {
+    const points = document.querySelectorAll('.point');
+    const playerRect = player.getBoundingClientRect();
+
+    if(points.length === 0) {
+        nextlevel();
+    }
+
+    points.forEach(point => {
+        const pointRect = point.getBoundingClientRect();
+
+        if (
+            playerRect.top < pointRect.bottom &&
+            playerRect.bottom > pointRect.top &&
+            playerRect.left < pointRect.right &&
+            playerRect.right > pointRect.left
+        ) {
+            point.classList.remove("point"); 
+            score += 10;
+            document.getElementsByClassName("score")[0].getElementsByTagName("p")[0].textContent = score;
+        }
+    });
+}
+
+function handleGameOver() {
+    gameOver = true;
+    clearInterval(enemyMovementInterval);
+    console.log("dead animation starts"); 
+    player.classList.add('dead');
+    deadMusic.play();
+
+    player.addEventListener('animationend', function onAnimationEnd() {
+        console.log("Animation ended, displaying reset button");
+        player.removeEventListener('animationend', onAnimationEnd);
+
+        // // Prompt the player to enter their name
+        const playerName = prompt(`Game Over! Your score is ${score}. Enter your name to register in the leaderboard:`, "Unknown Player");
+        saveScore(playerName || "Unknown Player", score);
+
+        // to display reset button
+        const resetButton = document.createElement('button');
+        resetButton.innerText = 'Restart Game';
+        resetButton.style.position = 'absolute';
+        resetButton.style.top = '50%';
+        resetButton.style.left = '50%';
+        resetButton.style.transform = 'translate(-50%, -50%)';
+        resetButton.style.padding = '10px 20px';
+        resetButton.style.fontSize = '16px';
+
+        document.body.appendChild(resetButton);
+
+        resetButton.addEventListener('click', function() {
+            location.reload();
+        });
+
+        updateLeaderboard();
+    });
+}
+
+function saveScore(name, score) {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    const existingEntry = leaderboard.find(entry => entry.name === name);
+
+    if (existingEntry) {
+        if (score > existingEntry.score) {
+            existingEntry.score = score;
+        }
+    } else {
+        leaderboard.push({ name, score });
+    }
+
+    leaderboard.sort((a, b) => b.score - a.score); // Sort by score in descending order
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+}
+
+// To update the leaderboard
+function updateLeaderboard() {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    const leaderboardElements = document.getElementsByClassName('leaderboard')[0].getElementsByTagName('ol');
+    
+    const leaderboardElement = leaderboardElements[0];
+    leaderboardElement.innerHTML = ''; // Clear existing leaderboard
+
+    leaderboard.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.name}........${entry.score}`;
+        leaderboardElement.appendChild(li);
+    });
+  }
+}
